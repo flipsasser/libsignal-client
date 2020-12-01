@@ -13,6 +13,7 @@ use static_assertions::const_assert_eq;
 use std::convert::TryFrom;
 use std::ffi::{c_void, CString};
 
+pub mod logging;
 mod util;
 
 use crate::util::*;
