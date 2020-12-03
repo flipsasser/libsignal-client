@@ -10,7 +10,7 @@ public class PreKeySignalMessage {
     private var handle: OpaquePointer?
 
     deinit {
-        signal_pre_key_signal_message_destroy(handle)
+        assertNoError(signal_pre_key_signal_message_destroy(handle))
     }
 
     public init<Bytes: ContiguousBytes>(bytes: Bytes) throws {
@@ -27,41 +27,49 @@ public class PreKeySignalMessage {
                 signedPreKeyId: UInt32,
                 baseKey: PublicKey,
                 identityKey: PublicKey,
-                message: SignalMessage) throws {
+                message: SignalMessage) {
 
         var preKeyId = preKeyId ?? 0xFFFFFFFF
 
-        try checkError(signal_pre_key_signal_message_new(&handle,
-                                                         version,
-                                                         registrationId,
-                                                         &preKeyId,
-                                                         signedPreKeyId,
-                                                         baseKey.nativeHandle,
-                                                         identityKey.nativeHandle,
-                                                         message.nativeHandle))
+        assertNoError(signal_pre_key_signal_message_new(&handle,
+                                                        version,
+                                                        registrationId,
+                                                        &preKeyId,
+                                                        signedPreKeyId,
+                                                        baseKey.nativeHandle,
+                                                        identityKey.nativeHandle,
+                                                        message.nativeHandle))
     }
 
-    public func serialize() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_pre_key_signal_message_serialize(handle, $0, $1)
+    public func serialize() -> [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_pre_key_signal_message_serialize(handle, $0, $1)
+            }
         }
     }
 
-    public func version() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_pre_key_signal_message_get_version(handle, $0)
+    public var version: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_signal_message_get_version(handle, $0)
+            }
         }
     }
 
-    public func registrationId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_pre_key_signal_message_get_registration_id(handle, $0)
+    public var registrationId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_signal_message_get_registration_id(handle, $0)
+            }
         }
     }
 
-    public func preKeyId() throws -> UInt32? {
-        let id = try invokeFnReturningInteger {
-            signal_pre_key_signal_message_get_pre_key_id(handle, $0)
+    public var preKeyId: UInt32? {
+        let id = assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_signal_message_get_pre_key_id(handle, $0)
+            }
         }
 
         if id == 0xFFFFFFFF {
@@ -71,27 +79,33 @@ public class PreKeySignalMessage {
         }
     }
 
-    public func signedPreKeyId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_pre_key_signal_message_get_signed_pre_key_id(handle, $0)
+    public var signedPreKeyId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_signal_message_get_signed_pre_key_id(handle, $0)
+            }
         }
     }
 
-    public func baseKey() throws -> PublicKey {
-        return try invokeFnReturningPublicKey {
-            signal_pre_key_signal_message_get_base_key($0, handle)
+    public var baseKey: PublicKey {
+        return assertNoError {
+            try invokeFnReturningPublicKey {
+                signal_pre_key_signal_message_get_base_key($0, handle)
+            }
         }
     }
 
-    public func identityKey() throws -> PublicKey {
-        return try invokeFnReturningPublicKey {
-            signal_pre_key_signal_message_get_identity_key($0, handle)
+    public var identityKey: PublicKey {
+        return assertNoError {
+            try invokeFnReturningPublicKey {
+                signal_pre_key_signal_message_get_identity_key($0, handle)
+            }
         }
     }
 
-    public func signalMessage() throws -> SignalMessage {
+    public var signalMessage: SignalMessage {
         var m: OpaquePointer?
-        try checkError(signal_pre_key_signal_message_get_signal_message(&m, handle))
+        assertNoError(signal_pre_key_signal_message_get_signal_message(&m, handle))
         return SignalMessage(owned: m)
     }
 

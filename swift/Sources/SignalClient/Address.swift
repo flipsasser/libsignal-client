@@ -6,11 +6,11 @@
 import SignalFfi
 
 public class ProtocolAddress: ClonableHandleOwner {
-    public init(name: String, deviceId: UInt32) throws {
+    public init(name: String, deviceId: UInt32) {
         var handle: OpaquePointer?
-        try checkError(signal_address_new(&handle,
-                                          name,
-                                          deviceId))
+        assertNoError(signal_address_new(&handle,
+                                         name,
+                                         deviceId))
         super.init(owned: handle!)
     }
 
@@ -26,19 +26,23 @@ public class ProtocolAddress: ClonableHandleOwner {
         return signal_address_clone(&newHandle, currentHandle)
     }
 
-    internal override class func destroyNativeHandle(_ handle: OpaquePointer) {
-        signal_address_destroy(handle)
+    internal override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+        return signal_address_destroy(handle)
     }
 
     public var name: String {
-        return try! invokeFnReturningString {
-            signal_address_get_name(nativeHandle, $0)
+        return assertNoError {
+            try invokeFnReturningString {
+                signal_address_get_name(nativeHandle, $0)
+            }
         }
     }
 
     public var deviceId: UInt32 {
-        return try! invokeFnReturningInteger {
-            signal_address_get_device_id(nativeHandle, $0)
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_address_get_device_id(nativeHandle, $0)
+            }
         }
     }
 }

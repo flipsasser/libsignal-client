@@ -17,9 +17,9 @@ public class ServerCertificate: ClonableHandleOwner {
     }
 
     // For testing
-    public init(keyId: UInt32, publicKey: PublicKey, trustRoot: PrivateKey) throws {
+    public init(keyId: UInt32, publicKey: PublicKey, trustRoot: PrivateKey) {
         var result: OpaquePointer?
-        try checkError(signal_server_certificate_new(&result, keyId, publicKey.nativeHandle, trustRoot.nativeHandle))
+        assertNoError(signal_server_certificate_new(&result, keyId, publicKey.nativeHandle, trustRoot.nativeHandle))
         super.init(owned: result!)
     }
 
@@ -31,37 +31,47 @@ public class ServerCertificate: ClonableHandleOwner {
         super.init(borrowing: handle)
     }
 
-    internal override class func destroyNativeHandle(_ handle: OpaquePointer) {
-        signal_server_certificate_destroy(handle)
+    internal override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+        return signal_server_certificate_destroy(handle)
     }
 
-    public func keyId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_server_certificate_get_key_id(nativeHandle, $0)
+    public var keyId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_server_certificate_get_key_id(nativeHandle, $0)
+            }
         }
     }
 
-    public func serialize() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_server_certificate_get_serialized(nativeHandle, $0, $1)
+    public func serialize() -> [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_server_certificate_get_serialized(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func certificateBytes() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_server_certificate_get_certificate(nativeHandle, $0, $1)
+    public var certificateBytes: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_server_certificate_get_certificate(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func signatureBytes() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_server_certificate_get_signature(nativeHandle, $0, $1)
+    public var signatureBytes: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_server_certificate_get_signature(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func publicKey() throws -> PublicKey {
-        return try invokeFnReturningPublicKey {
-            signal_server_certificate_get_key($0, nativeHandle)
+    public var publicKey: PublicKey {
+        return assertNoError {
+            try invokeFnReturningPublicKey {
+                signal_server_certificate_get_key($0, nativeHandle)
+            }
         }
     }
 }
@@ -77,16 +87,16 @@ public class SenderCertificate: ClonableHandleOwner {
     }
 
     // For testing
-    public init(sender: SealedSenderAddress, publicKey: PublicKey, expiration: UInt64, signerCertificate: ServerCertificate, signerKey: PrivateKey) throws {
+    public init(sender: SealedSenderAddress, publicKey: PublicKey, expiration: UInt64, signerCertificate: ServerCertificate, signerKey: PrivateKey) {
         var result: OpaquePointer?
-        try checkError(signal_sender_certificate_new(&result,
-                                                     sender.uuidString,
-                                                     sender.e164,
-                                                     sender.deviceId,
-                                                     publicKey.nativeHandle,
-                                                     expiration,
-                                                     signerCertificate.nativeHandle,
-                                                     signerKey.nativeHandle))
+        assertNoError(signal_sender_certificate_new(&result,
+                                                    sender.uuidString,
+                                                    sender.e164,
+                                                    sender.deviceId,
+                                                    publicKey.nativeHandle,
+                                                    expiration,
+                                                    signerCertificate.nativeHandle,
+                                                    signerKey.nativeHandle))
         super.init(owned: result!)
     }
 
@@ -94,67 +104,81 @@ public class SenderCertificate: ClonableHandleOwner {
         super.init(owned: handle)
     }
 
-    internal override class func destroyNativeHandle(_ handle: OpaquePointer) {
-        signal_sender_certificate_destroy(handle)
+    internal override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+        return signal_sender_certificate_destroy(handle)
     }
 
-    public func expiration() throws -> UInt64 {
-        return try invokeFnReturningInteger {
-            signal_sender_certificate_get_expiration(nativeHandle, $0)
+    public var expiration: UInt64 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_sender_certificate_get_expiration(nativeHandle, $0)
+            }
         }
     }
 
-    public func deviceId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_sender_certificate_get_device_id(nativeHandle, $0)
+    public var deviceId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_sender_certificate_get_device_id(nativeHandle, $0)
+            }
         }
     }
 
-    public func serialize() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_sender_certificate_get_serialized(nativeHandle, $0, $1)
+    public func serialize() -> [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_sender_certificate_get_serialized(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func certificateBytes() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_sender_certificate_get_certificate(nativeHandle, $0, $1)
+    public var certificateBytes: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_sender_certificate_get_certificate(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func signatureBytes() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_sender_certificate_get_signature(nativeHandle, $0, $1)
+    public var signatureBytes: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_sender_certificate_get_signature(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func publicKey() throws -> PublicKey {
-        return try invokeFnReturningPublicKey {
-            signal_sender_certificate_get_key($0, nativeHandle)
+    public var publicKey: PublicKey {
+        return assertNoError {
+            try invokeFnReturningPublicKey {
+                signal_sender_certificate_get_key($0, nativeHandle)
+            }
         }
     }
 
-    public func senderUuid() throws -> String? {
-        return try invokeFnReturningOptionalString {
-            signal_sender_certificate_get_sender_uuid(nativeHandle, $0)
+    public var senderUuid: String? {
+        return assertNoError {
+            try invokeFnReturningOptionalString {
+                signal_sender_certificate_get_sender_uuid(nativeHandle, $0)
+            }
         }
     }
 
-    public func senderE164() throws -> String? {
-        return try invokeFnReturningOptionalString {
-            signal_sender_certificate_get_sender_e164(nativeHandle, $0)
+    public var senderE164: String? {
+        return assertNoError {
+            try invokeFnReturningOptionalString {
+                signal_sender_certificate_get_sender_e164(nativeHandle, $0)
+            }
         }
     }
 
-    public func sender() throws -> SealedSenderAddress {
-        return try SealedSenderAddress(e164: self.senderE164(),
-                                       uuidString: self.senderUuid(),
-                                       deviceId: self.deviceId())
+    public var sender: SealedSenderAddress {
+        return try! SealedSenderAddress(e164: self.senderE164, uuidString: self.senderUuid, deviceId: self.deviceId)
     }
 
-    public func serverCertificate() throws -> ServerCertificate {
+    public var serverCertificate: ServerCertificate {
         var handle: OpaquePointer?
-        try checkError(signal_sender_certificate_get_server_certificate(&handle, nativeHandle))
+        assertNoError(signal_sender_certificate_get_server_certificate(&handle, nativeHandle))
         return ServerCertificate(owned: handle!)
     }
 
@@ -209,26 +233,30 @@ public class UnidentifiedSenderMessageContent: ClonableHandleOwner {
         super.init(owned: result!)
     }
 
-    internal override class func destroyNativeHandle(_ handle: OpaquePointer) {
-        signal_unidentified_sender_message_content_destroy(handle)
+    internal override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+        return signal_unidentified_sender_message_content_destroy(handle)
     }
 
-    public func senderCertificate() throws -> SenderCertificate {
+    public var senderCertificate: SenderCertificate {
         var result: OpaquePointer?
-        try checkError(signal_unidentified_sender_message_content_get_sender_cert(&result, self.nativeHandle))
+        assertNoError(signal_unidentified_sender_message_content_get_sender_cert(&result, self.nativeHandle))
         return SenderCertificate(owned: result!)
     }
 
-    public func messageType() throws -> CiphertextMessage.MessageType {
-        let rawType = try invokeFnReturningInteger {
-            signal_unidentified_sender_message_content_get_msg_type($0, self.nativeHandle)
+    public var messageType: CiphertextMessage.MessageType {
+        let rawType = assertNoError {
+            try invokeFnReturningInteger {
+                signal_unidentified_sender_message_content_get_msg_type($0, self.nativeHandle)
+            }
         }
         return .init(rawValue: rawType)
     }
 
-    public func contents() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_unidentified_sender_message_content_get_contents(self.nativeHandle, $0, $1)
+    public var contents: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_unidentified_sender_message_content_get_contents(self.nativeHandle, $0, $1)
+            }
         }
     }
 }
@@ -245,6 +273,10 @@ public struct SealedSenderAddress: Hashable {
         self.e164 = e164
         self.uuidString = uuidString
         self.deviceId = deviceId
+    }
+
+    public init(e164: String?, uuidString: String, deviceId: UInt32) {
+        try! self.init(e164: e164, uuidString: uuidString as Optional, deviceId: deviceId)
     }
 }
 

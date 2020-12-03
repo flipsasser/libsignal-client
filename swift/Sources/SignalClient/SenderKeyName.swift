@@ -6,23 +6,24 @@
 import SignalFfi
 
 public class SenderKeyName: ClonableHandleOwner {
-    internal override class func destroyNativeHandle(_ handle: OpaquePointer) {
-        signal_sender_key_name_destroy(handle)
+    internal override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+        return signal_sender_key_name_destroy(handle)
     }
 
     internal override class func cloneNativeHandle(_ newHandle: inout OpaquePointer?, currentHandle: OpaquePointer?) -> SignalFfiErrorRef? {
         return signal_sender_key_name_clone(&newHandle, currentHandle)
     }
 
+    // FIXME: Do we need both of these entry points?
     public init(groupName: String, senderName: String, deviceId: UInt32) throws {
         var handle: OpaquePointer?
         try checkError(signal_sender_key_name_new(&handle, groupName, senderName, deviceId))
         super.init(owned: handle!)
     }
 
-    public init(groupName: String, sender: ProtocolAddress) throws {
+    public init(groupName: String, sender: ProtocolAddress) {
         var handle: OpaquePointer?
-        try checkError(signal_sender_key_name_new(&handle, groupName, sender.name, sender.deviceId))
+        assertNoError(signal_sender_key_name_new(&handle, groupName, sender.name, sender.deviceId))
         super.init(owned: handle!)
     }
 
@@ -35,20 +36,26 @@ public class SenderKeyName: ClonableHandleOwner {
     }
 
     public var groupId: String {
-        return try! invokeFnReturningString {
-            signal_sender_key_name_get_group_id(nativeHandle, $0)
+        return assertNoError {
+            try invokeFnReturningString {
+                signal_sender_key_name_get_group_id(nativeHandle, $0)
+            }
         }
     }
 
     public var senderName: String {
-        return try! invokeFnReturningString {
-            signal_sender_key_name_get_sender_name(nativeHandle, $0)
+        return assertNoError {
+            try invokeFnReturningString {
+                signal_sender_key_name_get_sender_name(nativeHandle, $0)
+            }
         }
     }
 
     public var senderDeviceId: UInt32 {
-        return try! invokeFnReturningInteger {
-            signal_sender_key_name_get_sender_device_id(nativeHandle, $0)
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_sender_key_name_get_sender_device_id(nativeHandle, $0)
+            }
         }
     }
 }

@@ -24,32 +24,41 @@ public class PublicKey: ClonableHandleOwner {
         super.init(borrowing: handle)
     }
 
-    internal override class func destroyNativeHandle(_ handle: OpaquePointer) {
-        signal_publickey_destroy(handle)
+    internal override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+        return signal_publickey_destroy(handle)
     }
 
     internal override class func cloneNativeHandle(_ newHandle: inout OpaquePointer?, currentHandle: OpaquePointer?) -> SignalFfiErrorRef? {
         return signal_publickey_clone(&newHandle, currentHandle)
     }
 
-    public func keyBytes() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_publickey_get_public_key_bytes(nativeHandle, $0, $1)
+    public var keyBytes: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_publickey_get_public_key_bytes(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func serialize() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_publickey_serialize(nativeHandle, $0, $1)
+    public func serialize() -> [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_publickey_serialize(nativeHandle, $0, $1)
+            }
         }
     }
 
-    public func verifySignature<MessageBytes, SignatureBytes>(message: MessageBytes, signature: SignatureBytes) throws -> Bool
+    public func verifySignature<MessageBytes, SignatureBytes>(message: MessageBytes, signature: SignatureBytes) -> Bool
     where MessageBytes: ContiguousBytes, SignatureBytes: ContiguousBytes {
         var result: Bool = false
-        try message.withUnsafeBytes { messageBytes in
-            try signature.withUnsafeBytes { signatureBytes in
-                try checkError(signal_publickey_verify(nativeHandle, &result, messageBytes.baseAddress?.assumingMemoryBound(to: UInt8.self), messageBytes.count, signatureBytes.baseAddress?.assumingMemoryBound(to: UInt8.self), signatureBytes.count))
+        message.withUnsafeBytes { messageBytes in
+            signature.withUnsafeBytes { signatureBytes in
+                assertNoError(signal_publickey_verify(nativeHandle,
+                                                      &result,
+                                                      messageBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                                                      messageBytes.count,
+                                                      signatureBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                                                      signatureBytes.count))
             }
         }
         return result
@@ -57,7 +66,7 @@ public class PublicKey: ClonableHandleOwner {
 
     public func compare(_ other: PublicKey) -> Int32 {
         var result: Int32 = 0
-        try! checkError(signal_publickey_compare(&result, nativeHandle, other.nativeHandle))
+        assertNoError(signal_publickey_compare(&result, nativeHandle, other.nativeHandle))
         return result
     }
 }

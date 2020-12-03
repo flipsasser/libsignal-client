@@ -10,7 +10,7 @@ public class PreKeyBundle {
     private var handle: OpaquePointer?
 
     deinit {
-        signal_pre_key_bundle_destroy(handle)
+        assertNoError(signal_pre_key_bundle_destroy(handle))
     }
 
     internal var nativeHandle: OpaquePointer? {
@@ -25,20 +25,20 @@ public class PreKeyBundle {
                                         signedPrekeyId: UInt32,
                                         signedPrekey: PublicKey,
                                         signedPrekeySignature: Bytes,
-                                        identity identityKey: IdentityKey) throws {
-        handle = try signedPrekeySignature.withUnsafeBytes {
+                                        identity identityKey: IdentityKey) {
+        handle = signedPrekeySignature.withUnsafeBytes {
             var prekeyId = prekeyId
             var result: OpaquePointer?
-            try checkError(signal_pre_key_bundle_new(&result,
-                                                     registrationId,
-                                                     deviceId,
-                                                     &prekeyId,
-                                                     prekey.nativeHandle,
-                                                     signedPrekeyId,
-                                                     signedPrekey.nativeHandle,
-                                                     $0.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                                                     $0.count,
-                                                     identityKey.publicKey.nativeHandle))
+            assertNoError(signal_pre_key_bundle_new(&result,
+                                                    registrationId,
+                                                    deviceId,
+                                                    &prekeyId,
+                                                    prekey.nativeHandle,
+                                                    signedPrekeyId,
+                                                    signedPrekey.nativeHandle,
+                                                    $0.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                                                    $0.count,
+                                                    identityKey.publicKey.nativeHandle))
             return result
         }
     }
@@ -49,44 +49,52 @@ public class PreKeyBundle {
                                         signedPrekeyId: UInt32,
                                         signedPrekey: PublicKey,
                                         signedPrekeySignature: Bytes,
-                                        identity identityKey: IdentityKey) throws {
-        handle = try signedPrekeySignature.withUnsafeBytes {
+                                        identity identityKey: IdentityKey) {
+        handle = signedPrekeySignature.withUnsafeBytes {
             var result: OpaquePointer?
-            try checkError(signal_pre_key_bundle_new(&result,
-                                                     registrationId,
-                                                     deviceId,
-                                                     nil,
-                                                     nil,
-                                                     signedPrekeyId,
-                                                     signedPrekey.nativeHandle,
-                                                     $0.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                                                     $0.count,
-                                                     identityKey.publicKey.nativeHandle))
+            assertNoError(signal_pre_key_bundle_new(&result,
+                                                    registrationId,
+                                                    deviceId,
+                                                    nil,
+                                                    nil,
+                                                    signedPrekeyId,
+                                                    signedPrekey.nativeHandle,
+                                                    $0.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                                                    $0.count,
+                                                    identityKey.publicKey.nativeHandle))
             return result
         }
     }
 
-    public func registrationId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_pre_key_bundle_get_registration_id(handle, $0)
+    public var registrationId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_bundle_get_registration_id(handle, $0)
+            }
         }
     }
 
-    public func deviceId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_pre_key_bundle_get_device_id(handle, $0)
+    public var deviceId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_bundle_get_device_id(handle, $0)
+            }
         }
     }
 
-    public func signedPreKeyId() throws -> UInt32 {
-        return try invokeFnReturningInteger {
-            signal_pre_key_bundle_get_signed_pre_key_id(handle, $0)
+    public var signedPreKeyId: UInt32 {
+        return assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_bundle_get_signed_pre_key_id(handle, $0)
+            }
         }
     }
 
-    public func preKeyId() throws -> UInt32? {
-        let prekey_id = try invokeFnReturningInteger {
-            signal_pre_key_bundle_get_signed_pre_key_id(handle, $0)
+    public var preKeyId: UInt32? {
+        let prekey_id = assertNoError {
+            try invokeFnReturningInteger {
+                signal_pre_key_bundle_get_signed_pre_key_id(handle, $0)
+            }
         }
 
         if prekey_id == 0xFFFFFFFF {
@@ -96,28 +104,36 @@ public class PreKeyBundle {
         }
     }
 
-    public func preKeyPublic() throws -> PublicKey? {
-        return try invokeFnReturningOptionalPublicKey {
-            signal_pre_key_bundle_get_pre_key_public($0, handle)
+    public var preKeyPublic: PublicKey? {
+        return assertNoError {
+            try invokeFnReturningOptionalPublicKey {
+                signal_pre_key_bundle_get_pre_key_public($0, handle)
+            }
         }
     }
 
-    public func identityKey() throws -> IdentityKey {
-        let pk = try invokeFnReturningPublicKey {
-            signal_pre_key_bundle_get_identity_key($0, handle)
+    public var identityKey: IdentityKey {
+        let pk = assertNoError {
+            try invokeFnReturningPublicKey {
+                signal_pre_key_bundle_get_identity_key($0, handle)
+            }
         }
         return IdentityKey(publicKey: pk)
     }
 
-    public func signedPreKeyPublic() throws -> PublicKey {
-        return try invokeFnReturningPublicKey {
-            signal_pre_key_bundle_get_signed_pre_key_public($0, handle)
+    public var signedPreKeyPublic: PublicKey {
+        return assertNoError {
+            try invokeFnReturningPublicKey {
+                signal_pre_key_bundle_get_signed_pre_key_public($0, handle)
+            }
         }
     }
 
-    public func signedPreKeySignature() throws -> [UInt8] {
-        return try invokeFnReturningArray {
-            signal_pre_key_bundle_get_signed_pre_key_signature(handle, $0, $1)
+    public var signedPreKeySignature: [UInt8] {
+        return assertNoError {
+            try invokeFnReturningArray {
+                signal_pre_key_bundle_get_signed_pre_key_signature(handle, $0, $1)
+            }
         }
     }
 }
